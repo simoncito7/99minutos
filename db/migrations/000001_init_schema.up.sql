@@ -1,4 +1,4 @@
-CREATE TABLE "clients" (
+CREATE TABLE "client" (
   "id" bigserial PRIMARY KEY,
   "name" varchar NOT NULL,
   "last_name" varchar NOT NULL,
@@ -8,7 +8,7 @@ CREATE TABLE "clients" (
   "token" varchar NOT NULL
 );
 
-CREATE TABLE "orders" (
+CREATE TABLE "order" (
   "id" bigserial PRIMARY KEY,
   "client_id" bigint NOT NULL,
   "origin_address" varchar NOT NULL,
@@ -36,12 +36,12 @@ CREATE TABLE "auth" (
   "token" varchar NOT NULL
 );
 
-CREATE INDEX ON "clients" ("email");
+CREATE INDEX ON "client" ("email");
 
-CREATE INDEX ON "orders" ("client_id");
+CREATE INDEX ON "order" ("client_id");
 
 CREATE INDEX ON "auth" ("client_id");
 
-ALTER TABLE "orders" ADD FOREIGN KEY ("client_id") REFERENCES "clients" ("id");
+ALTER TABLE "order" ADD FOREIGN KEY ("client_id") REFERENCES "client" ("id");
 
-ALTER TABLE "auth" ADD FOREIGN KEY ("client_id") REFERENCES "clients" ("id");
+ALTER TABLE "auth" ADD FOREIGN KEY ("client_id") REFERENCES "client" ("id");
