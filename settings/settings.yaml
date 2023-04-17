@@ -1,0 +1,7 @@
+port: 5432
+database:
+  host: localhost
+  port: 5432
+  user: root
+  password: root
+  name: logistic_app

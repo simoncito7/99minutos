@@ -1,18 +1,32 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
+
+	"github.com/99minutos/cmd/internal/handler"
+	"github.com/99minutos/db"
+	"github.com/99minutos/internal/repository"
+	"github.com/99minutos/settings"
 )
 
 func main() {
-	err := run()
+	ctx := context.Background()
+	s, err := settings.NewSettings()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("problem with settings")
 	}
-}
+	db, err := db.New(ctx, s)
+	if err != nil {
+		log.Fatal("problem with db", err)
+	}
 
-func run() error {
-	fmt.Println("Hello, world!")
-	return nil
+	repo := repository.New(db)
+
+	server := handler.NewServer(repo)
+
+	err = server.Start("127.0.0.1:8080")
+	if err != nil {
+		log.Fatal("can't start server")
+	}
 }
