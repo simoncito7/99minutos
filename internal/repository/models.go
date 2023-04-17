@@ -16,7 +16,7 @@ type Order struct {
 	ID       int `json:"id" db:"id"`
 	ClientID int `json:"client_id" db:"client_id"`
 
-	OriginAddress    string `json:"last_name" db:"last_name"`
+	OriginAddress    string `json:"origin_address" db:"origin_address"`
 	OriginPostalCode string `json:"origin_postal_code" db:"origin_postal_code"`
 	OriginExtNum     string `json:"origin_ext_num" db:"origin_ext_num"`
 	OriginIntNum     string `json:"origin_int_num" db:"origin_int_num"`
@@ -30,11 +30,11 @@ type Order struct {
 
 	ProductQuantity int       `json:"product_quantity" db:"product_quantity"`
 	TotalWeight     float64   `json:"total_weight" db:"total_weight"`
-	PackageSize     string    `json:"package_size" db:"package_size"`
-	Status          string    `json:"status" db:"status"`
+	PackageSize     string    `json:"package_size" db:"package_size" validate:"oneof=S M L"`
+	Status          string    `json:"status" db:"status" validate:"oneof=creado recolectado en_estacion en_ruta entregado cancelado"`
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
-	WasRefunded     string    `json:"was_refunded" db:"was_refunded"`
+	WasRefunded     bool      `json:"was_refunded" db:"was_refunded"`
 }
 
 type Auth struct {

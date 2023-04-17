@@ -16,5 +16,7 @@ migratedown:
 	migrate -path db/migrations -database "postgresql://root:root@localhost:5432/logistic_app?sslmode=disable" -verbose down
 test:
 	go test -v -cover ./...
+run:
+	go run cmd/main.go 
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc test
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc test run

@@ -2,11 +2,11 @@ package repository
 
 import (
 	"context"
+	"fmt"
 )
 
 const (
-	_queryCreateOrder = `
-    INSERT INTO order (
+	_queryCreateOrder = `INSERT INTO "order" (
         client_id,
         origin_address,
         origin_postal_code,
@@ -26,9 +26,9 @@ const (
         updated_at,
         was_refunded
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`
-	_queryInquiryOrder = `SELECT * FROM order WHERE id = ?`
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
+
+	_queryInquiryOrder = `SELECT * FROM "order" WHERE id = $1`
 )
 
 func (r *Repository) CreateOrder(ctx context.Context, order Order) error {
@@ -71,6 +71,7 @@ func (r *Repository) InquireOrder(ctx context.Context, id int) (Order, error) {
 }
 
 func (r *Repository) UpdateOrderStatus(ctx context.Context, client Client) error {
+	fmt.Println("Hello!")
 	return nil
 }
 

@@ -2,47 +2,31 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
+	"github.com/99minutos/cmd/internal/handler"
 	"github.com/99minutos/db"
 	"github.com/99minutos/internal/repository"
-	"github.com/99minutos/internal/service"
 	"github.com/99minutos/settings"
-	"github.com/jmoiron/sqlx"
-	"go.uber.org/fx"
 )
 
 func main() {
-	err := run()
+	ctx := context.Background()
+	s, err := settings.NewSettings()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("problem with settings")
 	}
-}
+	db, err := db.New(ctx, s)
+	if err != nil {
+		log.Fatal("problem with db", err)
+	}
 
-func run() error {
-	app := fx.New(
-		fx.Provide(
-			context.Background,
-			settings.NewSettings,
-			db.New,
-			repository.New,
-			service.New,
-		),
+	repo := repository.New(db)
 
-		fx.Invoke(
-			func(db *sqlx.DB) {
-				_, err := db.Query("select * from clients")
-				if err != nil {
-					panic(err)
-				}
-			},
-		),
-	)
+	server := handler.NewServer(repo)
 
-	fmt.Println("Hello, world!")
-
-	app.Run()
-
-	return nil
+	err = server.Start("127.0.0.1:8080")
+	if err != nil {
+		log.Fatal("can't start server")
+	}
 }

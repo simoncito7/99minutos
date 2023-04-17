@@ -5,17 +5,14 @@ import (
 	"fmt"
 
 	"github.com/99minutos/settings"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 func New(ctx context.Context, s *settings.Settings) (*sqlx.DB, error) {
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
-		s.DB.User,
-		s.DB.Password,
-		s.DB.Host,
-		s.Port,
-		s.DB.Name)
+	connectionString := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		s.DB.Host, s.DB.Port, s.DB.User, s.DB.Password, s.DB.Name)
 
-	return sqlx.ConnectContext(ctx, "mysql", connectionString)
+	return sqlx.ConnectContext(ctx, "postgres", connectionString)
 }
