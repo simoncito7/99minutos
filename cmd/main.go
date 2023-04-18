@@ -7,6 +7,7 @@ import (
 	"github.com/99minutos/cmd/internal/handler"
 	"github.com/99minutos/db"
 	"github.com/99minutos/internal/repository"
+	"github.com/99minutos/internal/service"
 	"github.com/99minutos/settings"
 )
 
@@ -23,7 +24,9 @@ func main() {
 
 	repo := repository.New(db)
 
-	server := handler.NewServer(repo)
+	serv := service.New(repo)
+
+	server := handler.NewServer(serv)
 
 	err = server.Start("127.0.0.1:8080")
 	if err != nil {

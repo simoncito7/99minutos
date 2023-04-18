@@ -36,7 +36,6 @@ func TestCreateClient(t *testing.T) {
 	err = db.GetContext(context.Background(), &fetchedUser, "SELECT * FROM client WHERE email = $1", user.Email)
 	require.NoError(t, err)
 
-	// assert that the fetched user matches the expected user
 	require.Equal(t, user.Name, fetchedUser.Name)
 	require.Equal(t, user.LastName, fetchedUser.LastName)
 	require.Equal(t, user.Email, fetchedUser.Email)
