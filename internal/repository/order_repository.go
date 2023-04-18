@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"time"
 )
 
 const (
@@ -29,6 +29,12 @@ const (
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
 
 	_queryInquiryOrder = `SELECT * FROM "order" WHERE id = $1`
+
+	_queryToUpdateOrderStatus = `UPDATE "order" SET status = $1, updated_at = $2 WHERE id = $3`
+
+	_queryToDeleteOrder = `DELETE FROM "order" WHERE id = $1`
+
+	_queryAllOrders = `SELECT * FROM "order"`
 )
 
 func (r *Repository) CreateOrder(ctx context.Context, order Order) error {
@@ -60,7 +66,7 @@ func (r *Repository) CreateOrder(ctx context.Context, order Order) error {
 	return nil
 }
 
-func (r *Repository) InquireOrder(ctx context.Context, id int) (Order, error) {
+func (r *Repository) GetOrder(ctx context.Context, id int) (Order, error) {
 	var order Order
 	err := r.db.Get(&order, _queryInquiryOrder, id)
 	if err != nil {
@@ -70,11 +76,32 @@ func (r *Repository) InquireOrder(ctx context.Context, id int) (Order, error) {
 	return order, nil
 }
 
-func (r *Repository) UpdateOrderStatus(ctx context.Context, client Client) error {
-	fmt.Println("Hello!")
+func (r *Repository) UpdateOrderStatus(ctx context.Context, order Order) error {
+	_, err := r.db.ExecContext(ctx, _queryToUpdateOrderStatus, order.Status, time.Now(), order.ID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (r *Repository) CancelOrder(ctx context.Context, client Client) error {
+func (r *Repository) DeleteOrder(ctx context.Context, id int) error {
+	_, err := r.db.ExecContext(ctx, _queryToDeleteOrder, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// extra functions
+
+func (r *Repository) GetAllOrders(ctx context.Context) ([]Order, error) {
+	var orders []Order
+	err := r.db.SelectContext(ctx, &orders, _queryAllOrders)
+	if err != nil {
+		return []Order{}, err
+	}
+
+	return orders, nil
 }

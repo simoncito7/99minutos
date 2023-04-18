@@ -15,12 +15,11 @@ func TestRepository_CreateOrder(t *testing.T) {
 
 	repository := New(db)
 
-	newOrder := getFakeOrder()
+	newOrder := createFakeOrder()
 
 	err := repository.CreateOrder(context.Background(), newOrder)
 	require.NoError(t, err)
 
-	// Verify that the order was created
 	var order Order
 	err = db.Get(&order, fmt.Sprintf(`SELECT * FROM "order" WHERE client_id = $%d`, newOrder.ClientID), newOrder.ClientID)
 	require.NoError(t, err)
@@ -48,13 +47,13 @@ func TestInquireOrder(t *testing.T) {
 
 	repo := New(db)
 
-	order := getFakeOrder()
+	order := createFakeOrder()
 
 	// In this case I will check with an existent element just for testing
 	// I already checked that for id = 4 there is an stored element in the table "order"
 
 	// retrieve the order by its ID
-	retrievedOrder, err := repo.InquireOrder(context.Background(), 4)
+	retrievedOrder, err := repo.GetOrder(context.Background(), 4)
 	require.NoError(t, err)
 
 	require.Equal(t, retrievedOrder.ClientID, order.ClientID)
@@ -74,12 +73,12 @@ func TestInquireOrder(t *testing.T) {
 	require.Equal(t, retrievedOrder.Status, order.Status)
 
 	// retrieve the order by its ID
-	retrievedOrder, err = repo.InquireOrder(context.Background(), 1)
+	retrievedOrder, err = repo.GetOrder(context.Background(), 1)
 	require.Error(t, err)
 	require.Empty(t, retrievedOrder)
 }
 
-func getFakeOrder() Order {
+func createFakeOrder() Order {
 	return Order{
 		ClientID:              1,
 		OriginAddress:         "origin address",
@@ -100,4 +99,52 @@ func getFakeOrder() Order {
 		UpdatedAt:             time.Now(),
 		WasRefunded:           false,
 	}
+}
+
+func TestUpdateOrder(t *testing.T) {
+	db := createTestDB(t)
+	defer db.Close()
+
+	repo := New(db)
+
+	order := createFakeOrder()
+
+	err := repo.CreateOrder(context.Background(), order)
+	require.NoError(t, err)
+
+	// order status updated to "en_ruta".
+	updatedOrder := Order{
+		ID:        6,
+		Status:    "en_ruta",
+		UpdatedAt: time.Now(),
+	}
+
+	err = repo.UpdateOrderStatus(context.Background(), updatedOrder)
+	require.NoError(t, err)
+
+	// here we retrieve the order from the database and verify that
+	// its status has been updated.
+	retrievedOrder, err := repo.GetOrder(context.Background(), 6)
+	require.NoError(t, err)
+	require.Equal(t, "en_ruta", retrievedOrder.Status)
+}
+
+func TestDeleteOrder(t *testing.T) {
+	db := createTestDB(t)
+	defer db.Close()
+
+	repo := New(db)
+
+	order := createFakeOrder()
+
+	err := repo.CreateOrder(context.Background(), order)
+	require.NoError(t, err)
+
+	err = repo.DeleteOrder(context.Background(), order.ID)
+	require.NoError(t, err)
+
+	// retrieve the order from the database to check if it was deleted
+	retrievedOrder, err := repo.GetOrder(context.Background(), order.ID)
+	require.Error(t, err)
+	require.Equal(t, Order{}, retrievedOrder)
 }
