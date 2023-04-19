@@ -18,7 +18,12 @@ func New(repo Repository) *Service {
 }
 
 func (s *Service) CreateOrder(ctx context.Context, order repository.Order) error {
-	err := s.repo.CreateOrder(ctx, order)
+	_, err := s.repo.GetClient(ctx, order.ClientID)
+	if err != nil {
+		return err // check if "sql: no rows in result set"
+	}
+
+	err = s.repo.CreateOrder(ctx, order)
 	if err != nil {
 		return err
 	}
@@ -82,6 +87,24 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]repository.Order, error) 
 	}
 
 	return orders, nil
+}
+
+func (s *Service) CreateClient(ctx context.Context, client repository.Client) error {
+	err := s.repo.CreateClient(ctx, client)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetClient(ctx context.Context, username string) (repository.Client, error) {
+	client, err := s.repo.GetClient(ctx, username)
+	if err != nil {
+		return repository.Client{}, err
+	}
+
+	return client, nil
 }
 
 func (s *Service) wasOrderCancelledBeforeTwoMinutes(created, updated time.Time) bool {

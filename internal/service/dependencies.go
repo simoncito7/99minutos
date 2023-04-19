@@ -7,6 +7,9 @@ import (
 )
 
 type Repository interface {
+	CreateClient(ctx context.Context, client repository.Client) error
+	GetClient(ctx context.Context, username string) (repository.Client, error)
+
 	CreateOrder(ctx context.Context, order repository.Order) error
 	GetOrder(ctx context.Context, id int) (repository.Order, error)
 	UpdateOrderStatus(ctx context.Context, order repository.Order) error

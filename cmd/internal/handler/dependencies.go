@@ -8,8 +8,8 @@ import (
 )
 
 type OrderRequest struct {
-	ID       int `json:"id"`
-	ClientID int `json:"client_id"`
+	ID       int    `json:"id"`
+	ClientID string `json:"client_id"`
 
 	OriginAddress    string `json:"origin_address"`
 	OriginPostalCode string `json:"origin_postal_code"`
@@ -32,7 +32,28 @@ type OrderRequest struct {
 	WasRefunded     bool      `json:"was_refunded"`
 }
 
+type Client struct {
+	Username  string    `json:"username"`
+	Fullname  string    `json:"fullname"`
+	Password  string    `json:"password"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+}
+
+type LoginClientRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginClientResponse struct {
+	AccessToken string `json:"access_token"`
+	Client      Client `json:"client"`
+}
+
 type Service interface {
+	CreateClient(ctx context.Context, client repository.Client) error
+	GetClient(ctx context.Context, username string) (repository.Client, error)
+
 	CreateOrder(ctx context.Context, order repository.Order) error
 	InquireOrder(ctx context.Context, id int) (repository.Order, error)
 	UpdateOrder(ctx context.Context, incomingOrder repository.Order) (bool, error)

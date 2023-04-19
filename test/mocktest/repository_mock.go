@@ -41,3 +41,13 @@ func (repo *RepositoryMock) GetAllOrders(ctx context.Context) ([]repository.Orde
 	args := repo.Called()
 	return args.Get(0).([]repository.Order), args.Error(1)
 }
+
+func (repo *RepositoryMock) CreateClient(ctx context.Context, client repository.Client) error {
+	args := repo.Called()
+	return args.Error(0)
+}
+
+func (repo *RepositoryMock) GetClient(ctx context.Context, username string) (repository.Client, error) {
+	args := repo.Called()
+	return args.Get(0).(repository.Client), args.Error(1)
+}
