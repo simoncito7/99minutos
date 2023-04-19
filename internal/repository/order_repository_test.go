@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -21,7 +21,7 @@ func TestRepository_CreateOrder(t *testing.T) {
 	require.NoError(t, err)
 
 	var order Order
-	err = db.Get(&order, fmt.Sprintf(`SELECT * FROM "order" WHERE client_id = $%d`, newOrder.ClientID), newOrder.ClientID)
+	err = db.Get(&order, `SELECT * FROM orders WHERE client_id = $1`, newOrder.ClientID)
 	require.NoError(t, err)
 	require.Equal(t, newOrder.ClientID, order.ClientID)
 	require.Equal(t, newOrder.OriginAddress, order.OriginAddress)
@@ -41,7 +41,7 @@ func TestRepository_CreateOrder(t *testing.T) {
 	require.Equal(t, newOrder.WasRefunded, order.WasRefunded)
 }
 
-func TestInquireOrder(t *testing.T) {
+func TestGetOrder(t *testing.T) {
 	db := createTestDB(t)
 	defer db.Close()
 
@@ -50,10 +50,10 @@ func TestInquireOrder(t *testing.T) {
 	order := createFakeOrder()
 
 	// In this case I will check with an existent element just for testing
-	// I already checked that for id = 4 there is an stored element in the table "order"
+	// I already checked that for id = 10 there is an stored element in the table "order"
 
 	// retrieve the order by its ID
-	retrievedOrder, err := repo.GetOrder(context.Background(), 4)
+	retrievedOrder, err := repo.GetOrder(context.Background(), 10)
 	require.NoError(t, err)
 
 	require.Equal(t, retrievedOrder.ClientID, order.ClientID)
@@ -80,7 +80,7 @@ func TestInquireOrder(t *testing.T) {
 
 func createFakeOrder() Order {
 	return Order{
-		ClientID:              1,
+		ClientID:              "vgoyo",
 		OriginAddress:         "origin address",
 		OriginPostalCode:      "12345",
 		OriginExtNum:          "1A",
@@ -99,6 +99,18 @@ func createFakeOrder() Order {
 		UpdatedAt:             time.Now(),
 		WasRefunded:           false,
 	}
+}
+
+func generateRandomClientID() string {
+	const charset = "abcdefghijklmnopqrstuvwxyz"
+	rand.Seed(time.Now().UnixNano())
+
+	name := make([]byte, 5)
+	for i := range name {
+		name[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(name)
 }
 
 func TestUpdateOrder(t *testing.T) {

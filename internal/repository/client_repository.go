@@ -3,13 +3,13 @@ package repository
 import (
 	"context"
 
-	"github.com/jmoiron/sqlx"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	_queryCreateUser = `INSERT INTO client (
-		name,
-		last_name,
+	_queryCreateUser = `INSERT INTO clients (
+		username,
+		fullname,
 		email,
 		password,
 		created_at,
@@ -17,11 +17,16 @@ const (
 	  ) VALUES ($1, $2, $3, $4, $5, $6);
 	  `
 
-	_queryGetClient = `SELECT * FROM client WHERE id = $1`
+	_queryGetClient = `SELECT * FROM clients WHERE username = $1`
 )
 
-func (r *Repository) CreateClient(ctx context.Context, db *sqlx.DB, client Client) error {
-	_, err := db.ExecContext(ctx, _queryCreateUser, client.Name, client.LastName, client.Email, client.Password, client.CreatedAt, client.Token)
+func (r *Repository) CreateClient(ctx context.Context, client Client) error {
+	bytePass, err := hashPassword(client.Password)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.ExecContext(ctx, _queryCreateUser, client.Username, client.Fullname, client.Email, string(bytePass), client.CreatedAt, client.Token)
 	if err != nil {
 		return err
 	}
@@ -29,12 +34,20 @@ func (r *Repository) CreateClient(ctx context.Context, db *sqlx.DB, client Clien
 	return nil
 }
 
-func (r *Repository) GetClient(ctx context.Context, id int) (Client, error) {
+func (r *Repository) GetClient(ctx context.Context, username string) (Client, error) {
 	var client Client
-	err := r.db.Get(&client, _queryGetClient, id)
+	err := r.db.Get(&client, _queryGetClient, username)
 	if err != nil {
 		return Client{}, err
 	}
 
 	return client, nil
+}
+
+func hashPassword(password string) ([]byte, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	return hashedPassword, nil
 }

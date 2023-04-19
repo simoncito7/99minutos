@@ -13,11 +13,12 @@ import (
 
 func main() {
 	ctx := context.Background()
-	s, err := settings.NewSettings()
+	cfg, err := settings.LoadConfig()
 	if err != nil {
-		log.Fatal("problem with settings")
+		log.Fatal("problem loading config")
 	}
-	db, err := db.New(ctx, s)
+
+	db, err := db.New(ctx, cfg)
 	if err != nil {
 		log.Fatal("problem with db", err)
 	}
@@ -26,9 +27,12 @@ func main() {
 
 	serv := service.New(repo)
 
-	server := handler.NewServer(serv)
+	server, err := handler.NewServer(serv, cfg)
+	if err != nil {
+		log.Fatal("can't initialize server")
+	}
 
-	err = server.Start("127.0.0.1:8080")
+	err = server.Start(cfg.Address)
 	if err != nil {
 		log.Fatal("can't start server")
 	}

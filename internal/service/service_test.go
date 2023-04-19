@@ -187,7 +187,7 @@ func TestCancelOrderCases(t *testing.T) {
 
 func getFakeOrder() repository.Order {
 	return repository.Order{
-		ClientID:              1,
+		ClientID:              "vader",
 		OriginAddress:         "origin address",
 		OriginPostalCode:      "12345",
 		OriginExtNum:          "1A",

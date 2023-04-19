@@ -3,9 +3,8 @@ package repository
 import "time"
 
 type Client struct {
-	ID        int       `json:"id" db:"id"`
-	Name      string    `json:"name" db:"name"`
-	LastName  string    `json:"last_name" db:"last_name"`
+	Username  string    `json:"username" db:"username"`
+	Fullname  string    `json:"fullname" db:"fullname"`
 	Email     string    `json:"email" db:"email"`
 	Password  string    `json:"password" db:"password"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
@@ -13,8 +12,8 @@ type Client struct {
 }
 
 type Order struct {
-	ID       int `json:"id" db:"id"`
-	ClientID int `json:"client_id" db:"client_id"`
+	ID       int    `json:"id" db:"id"`
+	ClientID string `json:"client_id" db:"client_id"`
 
 	OriginAddress    string `json:"origin_address" db:"origin_address"`
 	OriginPostalCode string `json:"origin_postal_code" db:"origin_postal_code"`
@@ -39,6 +38,6 @@ type Order struct {
 
 type Auth struct {
 	ID       int    `json:"id" db:"id"`
-	ClientID int    `json:"client_id" db:"client_id"`
+	ClientID string `json:"client_id" db:"client_id"`
 	Token    string `json:"token" db:"token"`
 }

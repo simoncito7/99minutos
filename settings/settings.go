@@ -2,6 +2,7 @@ package settings
 
 import (
 	_ "embed"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -18,11 +19,14 @@ type DatabaseSettings struct {
 }
 
 type Settings struct {
-	Port string           `yaml:"port"`
-	DB   DatabaseSettings `yaml:"database"`
+	Port          string           `yaml:"port"`
+	Address       string           `yaml:"address"`
+	TokenKey      string           `yaml:"token_key"`
+	TokenDuration time.Duration    `yaml:"token_duration"`
+	DB            DatabaseSettings `yaml:"database"`
 }
 
-func NewSettings() (*Settings, error) {
+func LoadConfig() (*Settings, error) {
 	var s Settings
 	err := yaml.Unmarshal(settingsContent, &s)
 	if err != nil {

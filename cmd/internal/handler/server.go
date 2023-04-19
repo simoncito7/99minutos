@@ -1,34 +1,38 @@
 package handler
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/99minutos/internal/repository"
 	"github.com/99minutos/internal/service"
+	"github.com/99minutos/settings"
+	"github.com/99minutos/token"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Server struct {
-	// repo    *repository.Repository
-	router  *gin.Engine
-	service Service
+	router     *gin.Engine
+	service    Service
+	tokenMaker token.Maker
+	cfg        *settings.Settings
 }
 
-func NewServer(serv *service.Service) *Server {
-	server := &Server{service: serv}
+func NewServer(serv *service.Service, cfg *settings.Settings) (*Server, error) {
+	tokenMaker, err := token.NewJWTMaker(cfg.TokenKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token: %w", err)
+	}
 	router := gin.Default()
+	server := &Server{service: serv, cfg: cfg, tokenMaker: tokenMaker}
 
-	router.GET("/test")
-	router.POST("/new-order", server.createOrder)
-	router.GET("/order/:id", server.inquireOrder)
-	router.GET("/orders", server.getAllOrders)
-	router.PUT("/order-update", server.updateOrderStatus)
-	router.DELETE("/order/:id", server.cancelOrder)
+	routes(router, server)
 
 	server.router = router
-	return server
+	return server, nil
 }
 
 func (server *Server) Start(address string) error {
@@ -108,6 +112,74 @@ func (server *Server) cancelOrder(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, fmt.Sprintf("order was refunded? --> %v", wasRefunded))
 }
 
+func (server *Server) createClient(ctx *gin.Context) {
+	var request Client
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = server.service.CreateClient(ctx, repository.Client{
+		Username:  request.Username,
+		Fullname:  request.Fullname,
+		Password:  request.Password,
+		Email:     request.Email,
+		CreatedAt: request.CreatedAt,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, nil)
+}
+
+func (server *Server) loginClient(ctx *gin.Context) {
+	fmt.Println(server.cfg)        // add this line
+	fmt.Println(server.tokenMaker) // add this line
+	var request LoginClientRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	client, err := server.service.GetClient(ctx, request.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !checkPasswork(client.Password, request.Password) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	accessToken, err := server.tokenMaker.CreateToken(client.Username, server.cfg.TokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	loginResponse := LoginClientResponse{
+		AccessToken: accessToken,
+		Client: Client{
+			Username:  client.Username,
+			Fullname:  client.Fullname,
+			Email:     client.Email,
+			CreatedAt: client.CreatedAt,
+		},
+	}
+
+	ctx.JSON(http.StatusOK, loginResponse)
+}
+
 func (server *Server) getAllOrders(ctx *gin.Context) {
 	orders, err := server.service.GetAllOrders(ctx)
 	if err != nil {
@@ -116,4 +188,9 @@ func (server *Server) getAllOrders(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, orders)
+}
+
+func checkPasswork(hashedPassword, password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err == nil
 }

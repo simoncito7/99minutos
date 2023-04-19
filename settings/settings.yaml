@@ -1,7 +1,11 @@
 port: 5432
+address: localhost:8080
+token_key: abcdefghijklmnopqrstuvwxyz012345
+token_duration: 60m
 database:
   host: localhost
   port: 5432
   user: root
   password: root
   name: logistic_app
+
