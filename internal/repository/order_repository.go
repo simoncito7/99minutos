@@ -56,7 +56,7 @@ func (r *Repository) CreateOrder(ctx context.Context, order Order) error {
 		order.PackageSize,
 		order.Status,
 		order.CreatedAt,
-		order.UpdatedAt,
+		time.Now(),
 		order.WasRefunded,
 	)
 	if err != nil {

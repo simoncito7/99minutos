@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/99minutos/internal/repository"
+	"github.com/labstack/gommon/log"
 )
 
 type Service struct {
@@ -20,9 +21,17 @@ func New(repo Repository) *Service {
 func (s *Service) CreateOrder(ctx context.Context, order repository.Order) error {
 	_, err := s.repo.GetClient(ctx, order.ClientID)
 	if err != nil {
-		return err // check if "sql: no rows in result set"
+		return err
 	}
 
+	if !s.checkAllowedWeightAndSize(order.PackageSize, order.TotalWeight) {
+		if order.TotalWeight > 25 {
+			return errors.New("for package weight bigger than 25kg, please contact us")
+		}
+		return errors.New("package size or weight not allowed")
+	}
+
+	order.CreatedAt = time.Now()
 	err = s.repo.CreateOrder(ctx, order)
 	if err != nil {
 		return err
@@ -64,7 +73,11 @@ func (s *Service) CancelOrder(ctx context.Context, id int) (bool, error) {
 		return false, err
 	}
 
-	refund := s.wasOrderCancelledBeforeTwoMinutes(storedOrder.CreatedAt, time.Now())
+	now := time.Now()
+
+	refund := s.wasOrderCancelledBeforeTwoMinutes(storedOrder.CreatedAt, now)
+	log.Debug(ctx, storedOrder.CreatedAt, now)
+	log.Info(ctx, storedOrder.CreatedAt, now)
 	switch true {
 	case strings.Contains(storedOrder.Status, "en_ruta"):
 		return false, errors.New("status en_ruta: order cannot be cancelled in this status")
@@ -111,4 +124,19 @@ func (s *Service) wasOrderCancelledBeforeTwoMinutes(created, updated time.Time) 
 	diff := updated.Sub(created)
 
 	return diff.Minutes() < 2
+}
+
+// checkAllowedWeightAndSize checks if the order is the weight is allowed for the
+// corresponding size.
+func (s *Service) checkAllowedWeightAndSize(size string, weight float64) bool {
+	switch size {
+	case "S":
+		return weight <= 5.0
+	case "M":
+		return weight > 5 && weight <= 15.0
+	case "L":
+		return weight > 15.0 && weight <= 25.0
+	}
+
+	return false
 }

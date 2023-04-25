@@ -1,7 +1,7 @@
 port: 5432
 address: localhost:8080
 token_key: abcdefghijklmnopqrstuvwxyz012345
-token_duration: 60m
+token_duration: 1440m
 database:
   host: localhost
   port: 5432
