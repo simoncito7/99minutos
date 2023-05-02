@@ -28,11 +28,21 @@
 		{
 			"name": "create order",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNzc4MTdmLWVkNzEtNGI2NS04MjM2LTg5ZGJlODUyN2Y1MiIsInVzZXJuYW1lIjoic2ltb24yIiwiaXNzdWVkX2F0IjoiMjAyMy0wNC0yNFQyMjowNjowMy40MzI4MjQtMDM6MDAiLCJleHBpcmVkX2F0IjoiMjAyMy0wNC0yNFQyMzowNjowMy40MzI4MjQtMDM6MDAifQ.zGCO6UvNX3QwU3TtRU911Ag5EIgIMfdoOZBUpBH8oPY",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"client_id\": 4,\n\n    \"origin_address\": \"Calle Falsa 123\",\n    \"origin_postal_code\": \"12345\",\n    \"origin_ext_num\": \"ext\",\n    \"origin_int_num\": \"int\",\n    \"origin_city\": \"Ciudad Ficticia\",\n\n    \"destination_address\": \"Calle Falsa 456\",\n    \"destination_postal_code\": \"67890\",\n    \"destination_ext_num\": \"ext\",\n    \"destination_int_num\": \"int\",\n    \"destination_city\": \"Otra Ciudad Ficticia\",\n\n    \"product_quantity\": 1,\n    \"total_weight\": 2.5,\n    \"package_size\": \"M\",\n    \"status\": \"creado\",\n    \"created_at\": \"2023-04-17T16:05:00Z\",\n    \"updated_at\": \"2023-04-17T16:05:00Z\",\n    \"was_refunded\": false\n}\n",
+					"raw": "{\n    \"client_id\": \"simon2\",\n\n    \"origin_address\": \"Calle Falsa 123\",\n    \"origin_postal_code\": \"12345\",\n    \"origin_ext_num\": \"ext\",\n    \"origin_int_num\": \"int\",\n    \"origin_city\": \"Ciudad Ficticia\",\n\n    \"destination_address\": \"Calle Falsa 456\",\n    \"destination_postal_code\": \"67890\",\n    \"destination_ext_num\": \"ext\",\n    \"destination_int_num\": \"int\",\n    \"destination_city\": \"Otra Ciudad Ficticia\",\n\n    \"product_quantity\": 1,\n    \"total_weight\": 2.5,\n    \"package_size\": \"M\",\n    \"status\": \"creado\",\n    \"created_at\": \"2023-04-17T16:05:00Z\",\n    \"updated_at\": \"2023-04-17T16:05:00Z\",\n    \"was_refunded\": false\n}\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -40,7 +50,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:8080/new-order",
+					"raw": "http://127.0.0.1:8080/order?&",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -50,7 +60,17 @@
 					],
 					"port": "8080",
 					"path": [
-						"new-order"
+						"order"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						},
+						{
+							"key": "",
+							"value": null
+						}
 					]
 				}
 			},
@@ -60,9 +80,15 @@
 			"name": "get specific order",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "http://127.0.0.1:8080/order/5",
+					"raw": "http://127.0.0.1:8080/order/12",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -73,7 +99,7 @@
 					"port": "8080",
 					"path": [
 						"order",
-						"5"
+						"12"
 					]
 				}
 			},
@@ -83,7 +109,27 @@
 			"name": "get all orders",
 			"request": {
 				"method": "GET",
-				"header": []
+				"header": [
+					{
+						"key": "authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8080/orders",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8080",
+					"path": [
+						"orders"
+					]
+				}
 			},
 			"response": []
 		},
@@ -91,10 +137,16 @@
 			"name": "update order status",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{   \n    \"id\":13,\n    \"client_id\": \"Darth\",\n\n    \"origin_address\": \"Calle Falsa 123\",\n    \"origin_postal_code\": \"12345\",\n    \"origin_ext_num\": \"ext\",\n    \"origin_int_num\": \"int\",\n    \"origin_city\": \"Ciudad Ficticia\",\n\n    \"destination_address\": \"Calle Falsa 456\",\n    \"destination_postal_code\": \"67890\",\n    \"destination_ext_num\": \"ext\",\n    \"destination_int_num\": \"int\",\n    \"destination_city\": \"Otra Ciudad Ficticia\",\n\n    \"product_quantity\": 1,\n    \"total_weight\": 2.5,\n    \"package_size\": \"M\",\n    \"status\": \"entregado\",\n    \"created_at\": \"2023-04-17T16:05:00Z\",\n    \"updated_at\": \"2023-04-17T16:05:00Z\",\n    \"was_refunded\": false\n}\n",
+					"raw": "{   \n    \"id\":13,\n    \"client_id\": \"Darth\",\n\n    \"origin_address\": \"Calle Falsa 123\",\n    \"origin_postal_code\": \"12345234\",\n    \"origin_ext_num\": \"ext\",\n    \"origin_int_num\": \"int\",\n    \"origin_city\": \"Ciudad Ficticia\",\n\n    \"destination_address\": \"Calle Falsa 456\",\n    \"destination_postal_code\": \"67890\",\n    \"destination_ext_num\": \"ext\",\n    \"destination_int_num\": \"int\",\n    \"destination_city\": \"Otra Ciudad Ficticia\",\n\n    \"product_quantity\": 1,\n    \"total_weight\": 2.5,\n    \"package_size\": \"M\",\n    \"status\": \"entregado\",\n    \"created_at\": \"2023-04-17T16:05:00Z\",\n    \"updated_at\": \"2023-04-17T16:05:00Z\",\n    \"was_refunded\": false\n}\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -123,9 +175,15 @@
 			"name": "Delete order",
 			"request": {
 				"method": "DELETE",
-				"header": [],
+				"header": [
+					{
+						"key": "authorization",
+						"value": "{{authorization}}",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "http://127.0.0.1:8080/order/5",
+					"raw": "http://127.0.0.1:8080/order/16",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -136,7 +194,7 @@
 					"port": "8080",
 					"path": [
 						"order",
-						"5"
+						"16"
 					]
 				}
 			},
@@ -149,7 +207,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"username\": \"simon\",\n\t\"fullname\": \"simon valenzuela\",\n\t\"password\": \"password123\",\n\t\"email\": \"simon@arg.com\"\n}\n",
+					"raw": "{\n\t\"username\": \"simon3\",\n\t\"fullname\": \"simon valenzuela\",\n\t\"password\": \"password123\",\n\t\"email\": \"simon@arg.com\"\n}\n",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -178,8 +236,17 @@
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"simon2\",\n\t\"password\": \"password123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://127.0.0.1:8080/client",
+					"raw": "http://127.0.0.1:8080/client/login",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -189,7 +256,8 @@
 					],
 					"port": "8080",
 					"path": [
-						"client"
+						"client",
+						"login"
 					]
 				}
 			},
